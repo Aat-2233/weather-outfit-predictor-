@@ -1,4 +1,4 @@
-Weather-Based Outfit Recommender
+Weather-Based Outfit Recommender: 
 A simple and intelligent application that recommends outfits based on current weather conditions, temperature, humidity, and season. This tool uses a machine learning model trained on a dataset of weather scenarios and corresponding suitable outfits.
 
 Features
