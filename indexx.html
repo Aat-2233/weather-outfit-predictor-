@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Outfit Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 28px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 1.05rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+        .result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result.success {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: 2px solid #4CAF50;
+        }
+
+        .result.error {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+            border: 2px solid #f44336;
+        }
+
+        .result .result-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .result .result-message {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .result .badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .result .badge {
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.35);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            backdrop-filter: saturate(140%) blur(2px);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .weather-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .temperature-display {
+            position: relative;
+        }
+
+        .temperature-display::after {
+            content: "°C";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none;
+        }
+
+        .humidity-display {
+            position: relative;
+        }
+
+        .humidity-display::after {
+            content: "%";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 1.2rem;
+        }
+
+        .form-group.with-icon input {
+            padding-left: 45px;
+        }
+
+        .info-section {
+            margin-top: 20px;
+            padding: 16px 18px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            background: #fafbff;
+            color: #444;
+            font-size: 0.95rem;
+        }
+        .info-section ul {
+            margin-left: 18px;
+            margin-top: 8px;
+        }
+        .info-section li {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌤️ Weather Outfit Predictor</h1>
+        
+        <form id="predictForm">
+            <div class="form-group">
+                <label for="temperature">Temperature</label>
+                <div class="temperature-display">
+                    <input type="number" id="temperature" placeholder="Enter temperature" required min="-50" max="60" step="0.1">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="humidity">Humidity</label>
+                <div class="humidity-display">
+                    <input type="number" id="humidity" placeholder="Enter humidity" required min="0" max="100" step="1">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="season">Season</label>
+                <select id="season" required>
+                    <option value="">Select season</option>
+                    <option value="spring">🌸 Spring</option>
+                    <option value="summer">☀️ Summer</option>
+                    <option value="autumn">🍂 Autumn</option>
+                    <option value="winter">❄️ Winter</option>
+                    <option value="monsoon">🌧️ Monsoon</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="weather">Weather Condition</label>
+                <select id="weather" required>
+                    <option value="">Select weather</option>
+                    <option value="sunny">☀️ Sunny</option>
+                    <option value="cloudy">☁️ Cloudy</option>
+                    <option value="rainy">🌧️ Rainy</option>
+                    <option value="snowy">❄️ Snowy</option>
+                    <option value="windy">💨 Windy</option>
+                    <option value="foggy">🌫️ Foggy</option>
+                    <option value="stormy">⛈️ Stormy</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Predict My Outfit
+            </button>
+        </form>
+
+        <div class="info-section" aria-label="Input ranges and rules">
+            <strong>Quick reference</strong>
+            <ul>
+                <li>Temperature: <span id="tempRange">—</span></li>
+                <li>Humidity: <span id="humidityRange">—</span></li>
+                <li>Season: <span id="seasonCount">—</span> types</li>
+                <li>Weather: <span id="weatherCount">—</span> types</li>
+                <li>Rule-based Outfit</li>
+            </ul>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing weather conditions...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+    const form = document.getElementById("predictForm");
+    const loading = document.getElementById("loading");
+    const result = document.getElementById("result");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // Form validation
+    function validateForm() {
+        const temp = document.getElementById("temperature").value;
+        const humidity = document.getElementById("humidity").value;
+        const season = document.getElementById("season").value;
+        const weather = document.getElementById("weather").value;
+
+        if (!temp || !humidity || !season || !weather) {
+            return false;
+        }
+
+        if (temp < -50 || temp > 60) {
+            showResult("Temperature must be between -50°C and 60°C", "error");
+            return false;
+        }
+
+        if (humidity < 0 || humidity > 100) {
+            showResult("Humidity must be between 0% and 100%", "error");
+            return false;
+        }
+
+        return true;
+    }
+
+    // Show result in a persistent, attractive box
+    function showResult(message, type) {
+        result.classList.remove('success', 'error');
+        result.classList.add(type);
+
+        if (type === 'success') {
+            const colonIndex = message.indexOf(':');
+            const itemsString = colonIndex >= 0 ? message.slice(colonIndex + 1).trim() : message;
+            const items = itemsString.split(',').map(s => s.trim()).filter(Boolean);
+
+            const badgesHtml = items.map(it => `<span class="badge">${it}</span>`).join(' ');
+            result.innerHTML = `
+                <div class="result-title">👔 Recommended Outfit</div>
+                <div class="result-message">Based on your inputs, wear:</div>
+                <div class="badges">${badgesHtml}</div>
+            `;
+        } else {
+            result.textContent = message;
+        }
+
+        result.classList.add('show');
+    }
+
+    // Fallback outfit prediction
+    function getPredictedOutfit(temp, humidity, season, weather) {
+        let outfit = [];
+
+        if (temp <= 0) {
+            outfit.push("Heavy winter coat", "Thermal underwear", "Wool sweater", "Winter boots", "Gloves", "Warm hat");
+        } else if (temp <= 10) {
+            outfit.push("Warm jacket", "Long pants", "Sweater or hoodie", "Closed shoes", "Light scarf");
+        } else if (temp <= 20) {
+            outfit.push("Light jacket or cardigan", "Long pants or jeans", "T-shirt or light sweater", "Sneakers");
+        } else if (temp <= 30) {
+            outfit.push("T-shirt or blouse", "Shorts or light pants", "Sandals or light sneakers");
+        } else {
+            outfit.push("Light, breathable clothing", "Shorts", "Tank top", "Sandals", "Sun hat");
+        }
+
+        if (weather === "Rainy" || weather === "Stormy") {
+            outfit.push("Waterproof jacket", "Umbrella", "Waterproof shoes");
+        } else if (weather === "Snowy") {
+            outfit.push("Snow boots", "Extra warm layers", "Waterproof outer layer");
+        } else if (weather === "Sunny") {
+            outfit.push("Sunglasses", "Sunscreen", "Light colors");
+        } else if (weather === "Windy") {
+            outfit.push("Windbreaker", "Secure accessories");
+        }
+
+        if (humidity > 70) {
+            outfit.push("Breathable fabrics", "Moisture-wicking materials");
+        }
+
+        return outfit.slice(0, 6).join(", ");
+    }
+
+    // Form submission handler
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) return;
+
+        loading.classList.add('show');
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Analyzing...";
+
+        let temp = parseFloat(document.getElementById("temperature").value);
+        let humidity = parseInt(document.getElementById("humidity").value);
+        let season = document.getElementById("season").value;
+        let weather = document.getElementById("weather").value;
+
+        // Capitalize season and weather to match backend LabelEncoder
+        season = season.charAt(0).toUpperCase() + season.slice(1);
+        weather = weather.charAt(0).toUpperCase() + weather.slice(1);
+
+        try {
+            const response = await fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    temperature: temp, 
+                    humidity: humidity, 
+                    season: season, 
+                    weather: weather 
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showResult(`👔 Recommended Outfit: ${data.outfit}`, "success");
+            } else {
+                showResult(`❌ ${data.error}`, "error");
+            }
+        } catch (error) {
+            console.log("Server unavailable, using local prediction");
+            const localOutfit = getPredictedOutfit(temp, humidity, season, weather);
+            showResult(`👔 Recommended Outfit: ${localOutfit}`, "success");
+        }
+
+        loading.classList.remove('show');
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Predict My Outfit";
+    });
+
+    // Quick reference updater (temperature fixed 0–40°C)
+    function updateQuickReference() {
+        const humidityInput = document.getElementById('humidity');
+        const seasonSelect = document.getElementById('season');
+        const weatherSelect = document.getElementById('weather');
+
+        const humidityMin = humidityInput.min !== '' ? Number(humidityInput.min) : null;
+        const humidityMax = humidityInput.max !== '' ? Number(humidityInput.max) : null;
+
+        const seasonCount = Array.from(seasonSelect.options).filter(o => o.value).length;
+        const weatherCount = Array.from(weatherSelect.options).filter(o => o.value).length;
+
+        document.getElementById('tempRange').textContent = `0–40°C`;
+        document.getElementById('humidityRange').textContent = `${humidityMin}–${humidityMax}%`;
+        document.getElementById('seasonCount').textContent = seasonCount;
+        document.getElementById('weatherCount').textContent = weatherCount;
+    }
+
+    updateQuickReference();
+</script>
+
+
+</body>
+</html>
