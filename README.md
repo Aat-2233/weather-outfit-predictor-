@@ -3,18 +3,18 @@ A simple and intelligent application that recommends outfits based on current we
 
 Features
 Predicts outfit suggestions based on:
-Temperature
-Humidity
-Season (Winter, Summer, Spring, Autumn, Monsoon)
-Weather condition (Sunny, Rainy, Snowy, Windy, Cloudy, Foggy)
+1)Temperature
+2)Humidity
+3)Season (Winter, Summer, Spring, Autumn, Monsoon)
+4)Weather condition (Sunny, Rainy, Snowy, Windy, Cloudy, Foggy)
 Provides precise recommendations for daily wear.
 User-friendly web interface with a responsive design.
 Offline fallback: Provides outfit suggestions even if the server is unavailable.
 
 Technology Stack
-Backend: Python, Flask
-Frontend: HTML, CSS, JavaScript
-Machine Learning: Scikit-learn (RandomForestClassifier)
-Data Processing: Pandas, LabelEncoder
-Model Persistence: Joblib
-CORS: Flask-CORS for cross-origin requests
+1)Backend: Python, Flask
+2)Frontend: HTML, CSS, JavaScript
+3)Machine Learning: Scikit-learn (RandomForestClassifier)
+4)Data Processing: Pandas, LabelEncoder
+5)Model Persistence: Joblib
+6)CORS: Flask-CORS for cross-origin requests
