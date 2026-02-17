@@ -13,7 +13,7 @@ CORS(app) # 👈 Enable CORS for all routes
 
 @app.route("/")
 def home():
-    return render_template("indexx.html")
+    return render_template("index.html")
 @app.route("/predict", methods=["POST"])
 def predict():
     data = request.json
